@@ -10,10 +10,21 @@
       margin: 0;
       font-family: Arial, sans-serif;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
       background: #f4f4f4;
+    }
+    #viewer {
+      width: 100%;
+      height: 80vh;
+    }
+    #error-message {
+      color: red;
+      display: none;
+      font-size: 1.2em;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -22,23 +33,51 @@
     src="https://cdn.glitch.me/0b51cbe4-2649-448e-827b-cfebaf79a0f3/bathroom_interior.glb?v=1735963906192" 
     ios-src="https://cdn.glitch.me/0b51cbe4-2649-448e-827b-cfebaf79a0f3/Bathroom_Interior.usdz?v=1735963880357"
     ar 
-    ar-modes="webxr scene-viewer quick-look" 
+    ar-modes="webxr scene-viewer quick-look"
     camera-controls 
-    touch-action="pan-y" 
-    tone-mapping="neutral" 
-    shadow-intensity="1" 
-    exposure="1"
+    touch-action="pan-y"
+    ar-scale="fixed"
     environment-image="neutral"
+    shadow-intensity="1"
+    exposure="1"
     id="viewer">
   </model-viewer>
 
+  <!-- Error message -->
+  <div id="error-message">Unable to load the model. Check the file or device compatibility.</div>
+
   <script>
     const modelViewer = document.getElementById('viewer');
+    const errorMessage = document.getElementById('error-message');
 
-    // Wait for the model to load, then trigger AR directly
+    // Log successful loading
     modelViewer.addEventListener('load', () => {
-      // Automatically trigger AR mode
-      modelViewer.activateAR();
+      console.log('Model loaded successfully.');
+    });
+
+    // Log errors
+    modelViewer.addEventListener('error', (event) => {
+      console.error('Error loading model:', event.detail);
+      errorMessage.style.display = 'block';
+    });
+
+    // Check AR activation
+    modelViewer.addEventListener('ar-status', (event) => {
+      console.log('AR Status:', event.detail.status);
+      if (event.detail.status === 'failed') {
+        console.error('AR activation failed.');
+        errorMessage.style.display = 'block';
+      }
+    });
+
+    // Automatically activate AR (if supported)
+    modelViewer.addEventListener('load', () => {
+      try {
+        modelViewer.activateAR();
+      } catch (error) {
+        console.error('AR activation failed:', error);
+        errorMessage.style.display = 'block';
+      }
     });
   </script>
 </body>
